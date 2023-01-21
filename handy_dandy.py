@@ -215,9 +215,12 @@ def saveCutoutsHeaders(cutouts_headers, filename):
     """Take in a tuple of (cutouts, headers) and a string filename and saves it as a joblib
 
     Args:
-        cutouts_headers (tuple of two lists of (50, 50) cutouts): _description_
-        filename (_type_): _description_
+        cutouts_headers (tuple of (ndarray, ndarray)): tuple of cutouts and headers
+        filename (string): full filename. The filename needs to have 
+    Returns:
+        returns nothing
     """    
+
     output = f'{getFileName(filename)}_cutouts_headers.jbl'
     with open(f'./datasets/cutouts/{output}', 'wb') as f:
         joblib.dump(cutouts_headers, f)

@@ -160,11 +160,7 @@ def plot_gallery(images, h, w, n_row=3, n_col=4):
             if type(images[i]) != Cutout2D:
                 plt.imshow(images[i].reshape((h, w)))
             else: 
-                plt.title(f'{images[i].center_original}')
-                plt.imshow(images[i].data.reshape((h, w)))
-        except IndexError:
-            pass
-            
+                # plt.title(f'{images[i].center_original}')
 
         plt.xticks(())
         plt.yticks(())

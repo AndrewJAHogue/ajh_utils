@@ -198,8 +198,9 @@ def createMaskedCutoutsList(input_data, **keywargs):
         ## use the masked data
         training_cutouts.append(masked)
         testing_cutouts.append(testing)
+        headers_cutouts.append(header)
 
-    return training_cutouts, testing_cutouts
+    return training_cutouts, testing_cutouts, headers_cutouts
 
     
     

@@ -107,7 +107,7 @@ def createCutoutsList(input_data,  **keywargs):
     threshold = keywargs.get('threshold', 5.)
     sigma = keywargs.get('sigma', 3.)
     fwhm = keywargs.get('fwhm', 10.)
-    auto_filter = keywargs.get('auto_filter', False)
+    do_filter = keywargs.get('do_filter', False)
     filename = keywargs.get('filename', 'createCutoutsList_Filler_Filename')
     
     from astropy.stats import sigma_clipped_stats
@@ -123,8 +123,6 @@ def createCutoutsList(input_data,  **keywargs):
     masked_cutouts = []
     cutouts_headers = []
 
-        
-
 
     for source in sources_list:
         point = ( source['xcentroid'], source['ycentroid'])
@@ -132,8 +130,10 @@ def createCutoutsList(input_data,  **keywargs):
         
         ## a filter for any point source that exceeds the std of the mosaic
         mean = np.nanmean(c.data)
-        if mean > (stats[0] + stats[2]) and auto_filter:
+        if mean > (stats[0] + stats[2]) and do_filter:
             continue 
+        if c.shape != cutout_size:
+            continue
 
 
         # save fwhm of original cutout
@@ -145,9 +145,8 @@ def createCutoutsList(input_data,  **keywargs):
             
             save_fwhm_to_file(fwhm, point, filename)
 
-        if c.shape >= cutout_size:
-            cutouts.append(c.data)
-            cutouts_headers.append(c)
+        cutouts.append(c.data)
+        cutouts_headers.append(c)
 
     cutouts = np.array(cutouts)
     cutouts_headers = np.array(cutouts_headers)
@@ -162,31 +161,42 @@ def createMaskedCutoutsList(input_data, **keywargs):
     radius = keywargs.get('radius', 8.)
     fwhm = keywargs.get('fwhm', 10.)
     threshold = keywargs.get('threshold', 5.)
+    auto_filter = keywargs.get('filter', False)
+    peak_percentage = keywargs.get('peak_percentage', 0.7)
 
     from astropy.stats import sigma_clipped_stats, SigmaClip
     from photutils.detection import DAOStarFinder
 
     sources = getSourcesList(input_data, sigma, fwhm, threshold)
+    stats = sigma_clipped_stats(input_data, sigma=sigma, stdfunc=np.nanstd)
 
     ## go to each source and make a cutout
     ## training are cutouts that have their peaks artifically masked
     ## testing cutouts are the original cutouts
     training_cutouts = []
     testing_cutouts = []
+    headers_cutouts = []
+    mean = np.nanmean(input_data)
     for s in sources:
         x = s['xcentroid']
         y = s['ycentroid']
         
+        header = Cutout2D(input_data, (x, y), 50)
         testing = Cutout2D(input_data, (x, y), 50).data
 
         ## ignore the edge cutouts that end up having sizes smaller than (50, 50)
         if testing.shape != (50, 50):
             continue
+
+        # ## skip the cutout that is outside the mean + std fro the whole input_data
+        # if mean > (stats[0] + stats[2]) and auto_filter:
+        #     continue 
         
+        ## mask the peak and then some using a configurable coefficient
         peak = np.nanmax(testing)
         ## .70 is artifically chosen
         ## mask only 30% of the peak flux
-        cutoff = peak * .70
+        cutoff = peak * peak_percentage
 
         masked = np.copy(testing)
         if masked.shape != (50, 50):
@@ -283,6 +293,7 @@ def processData(input_data, sigma=3.):
     Returns:
         Numpy array
     """    
+
 
 
     # masking the background

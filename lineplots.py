@@ -149,18 +149,47 @@ def MultiLinePlot(xvalue, yvalue, fileset=[], columnlimits=[None,None,None,None]
             plt.legend()
     plt.show()
 
-def plot_gallery(images, h, w, n_row=3, n_col=4):
+def plot_gallery(images, h, w, n_row=3, n_col=4, **keywargs):
+    sigma = keywargs.get('sigma', 3.)
+    stats = keywargs.get('stats', False)
+    
     from astropy.nddata import Cutout2D
+    from astropy.stats import sigma_clipped_stats
+    from astropy.utils.exceptions import AstropyUserWarning
+    import warnings
+
+        
+    
     plt.figure(figsize=(1.8 * n_col, 2.4 * n_row))
     plt.subplots_adjust(bottom=0, left=0.01, right=0.99, top=0.90, hspace=0.35)
     for i in range(n_row * n_col):
-        plt.subplot(n_row, n_col, i + 1)
+        if len(images) < i:
+            return
 
-        try:
+        title_str = ''
+
+        ## stats for each linecut
+        if stats:
+            ## sigma_clipped stats is going to spit out a user warning for every cutout
+            warnings.simplefilter('ignore', category=AstropyUserWarning)
+            with contextlib.suppress(IndexError):
+                mean, med, std =  sigma_clipped_stats(images[i], sigma=sigma, stdfunc=np.nanstd)
+
+            mean = round(mean, 3)
+            med = round(med, 3)
+            std = round(std, 3)
+
+            title_str =  f'{mean = }\n{med = }\n{std = }'
+            
+        plt.subplot(n_row, n_col, i + 1, xlabel=title_str)
+        plt.title(f'Index = {i}')
+
+        with contextlib.suppress(IndexError):
             if type(images[i]) != Cutout2D:
                 plt.imshow(images[i].reshape((h, w)))
             else: 
                 # plt.title(f'{images[i].center_original}')
+                plt.imshow(images[i].data.reshape((h, w)), title=f'Index = {i}')
 
         plt.xticks(())
         plt.yticks(())

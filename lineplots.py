@@ -1,3 +1,5 @@
+import contextlib
+from turtle import title
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -194,17 +196,36 @@ def plot_gallery(images, h, w, n_row=3, n_col=4, **keywargs):
         plt.xticks(())
         plt.yticks(())
 
-def linecut_plot_gallery(images, h, w, n_row=3, n_col=4):
+def GalleryRowLineCuts(images, h, w, n_row=3, n_col=4, **keywargs):
+    sigma = keywargs.get('sigma', 3.)
+    stats = keywargs.get('stats', False)
+    
+    from astropy.nddata import Cutout2D
+    from astropy.stats import sigma_clipped_stats
+    from astropy.utils.exceptions import AstropyUserWarning
+    import warnings
+
+        
+    
     plt.figure(figsize=(1.8 * n_col, 2.4 * n_row))
     plt.subplots_adjust(bottom=0, left=0.01, right=0.99, top=0.90, hspace=0.35)
     for i in range(n_row * n_col):
-        plt.subplot(n_row, n_col, i + 1)
+        ## stop function when there are not any more images to handle
+        if len(images) < i:
+            return
 
-        try:
-            x, row = GetNthRow(images[i], h//2)
-            plt.plot(x, row)
-        except IndexError:
-            pass
+
+            
+        plt.subplot(n_row, n_col, i + 1, ylabel='Pixel Value', xlabel='Y value')
+        plt.title(f'Index = {i}')
+
+        with contextlib.suppress(IndexError):
+            cutout = images[i].reshape(50,50) 
+            c_size = cutout.shape[0]
+            row = GetNthRow(cutout, c_size // 2)        
+            x = row[0]
+            y = row[1]
+            plt.plot(x, y)
 
         plt.xticks(())
         plt.yticks(())

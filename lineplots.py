@@ -177,11 +177,11 @@ def plot_gallery(images, h, w, n_row=3, n_col=4, **keywargs):
             with contextlib.suppress(IndexError):
                 mean, med, std =  sigma_clipped_stats(images[i], sigma=sigma, stdfunc=np.nanstd)
 
-            mean = round(mean, 3)
-            med = round(med, 3)
-            std = round(std, 3)
+                mean = round(mean, 3)
+                med = round(med, 3)
+                std = round(std, 3)
 
-            title_str =  f'{mean = }\n{med = }\n{std = }'
+                title_str =  f'{mean = }\n{med = }\n{std = }'
             
         plt.subplot(n_row, n_col, i + 1, xlabel=title_str)
         plt.title(f'Index = {i}')

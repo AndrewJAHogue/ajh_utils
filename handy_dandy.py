@@ -60,7 +60,11 @@ def getSourcesList(input_data, sigma=3.0, fwhm=10., threshold=5.):
     from astropy.stats import sigma_clipped_stats
     from photutils.detection import DAOStarFinder
     
-    mean, median, std = sigma_clipped_stats(input_data, sigma=sigma, stdfunc=np.nanstd)
+    if sigma == 0:
+        mean, median, std = sigma_clipped_stats(input_data,  stdfunc=np.nanstd)
+    else:
+        mean, median, std = sigma_clipped_stats(input_data, sigma=sigma, stdfunc=np.nanstd)
+
     d = DAOStarFinder(fwhm=fwhm, threshold=threshold * std)
     s = d(input_data - median)
     for col in s.colnames:
@@ -157,7 +161,7 @@ def createCutoutsList(input_data,  **keywargs):
 
 def createMaskedCutoutsList(input_data, **keywargs):
     sigma = keywargs.get('sigma', 3.)
-    nsigma = keywargs.get('nsigma', 10.)
+    # nsigma = keywargs.get('nsigma', 10.) deprecated
     radius = keywargs.get('radius', 8.)
     fwhm = keywargs.get('fwhm', 10.)
     threshold = keywargs.get('threshold', 5.)
@@ -168,7 +172,14 @@ def createMaskedCutoutsList(input_data, **keywargs):
     from photutils.detection import DAOStarFinder
 
     sources = getSourcesList(input_data, sigma, fwhm, threshold)
-    stats = sigma_clipped_stats(input_data, sigma=sigma, stdfunc=np.nanstd)
+    # if sigma == 0:
+    #     stats = sigma_clipped_stats(input_data, stdfunc=np.nanstd)
+    # else:
+    #     stats = sigma_clipped_stats(input_data, sigma=sigma, stdfunc=np.nanstd)
+
+    # print(f'mean, med, std')
+    # print(f'{stats =}')
+
 
     ## go to each source and make a cutout
     ## training are cutouts that have their peaks artifically masked
@@ -341,7 +352,7 @@ def save_fwhm_to_file(fwhm, point, filename):
         with open(FILE, 'xb') as f:
             pass
         
-    fwhm_list = list([ {'fwhm': fwhm, 'coordinate': point } ])
+    fwhm_list = [ {'fwhm': fwhm, 'coordinate': point } ]
 
     # print(f'{fwhm_list = }')
     
@@ -393,6 +404,9 @@ def getFWHM_GaussianFitScaledAmp(img):
 
 def get_fwhm(cutout):
     try:
+        if cutout.shape != (50,50):
+            cutout = cutout.reshape(50,50)
+        
         fwhm_maj, fwhm_min = getFWHM_GaussianFitScaledAmp(cutout)
         return np.sqrt(fwhm_maj**2 + fwhm_min**2)
     except RuntimeError:
@@ -420,19 +434,3 @@ def FilterStarsByStd(cutouts, stats):
     return filtered_cutouts
 
 # %%
-def main():
-    from astropy.io import fits
-    ## -------FILETREE-------------
-    ## -datasets
-    ## --MG
-    ## --- all the MG fits files
-    ##
-    ## -modules
-    ## --handy_dandy
-    ## ---current file
-    mg610p005 = fits.getdata('../../datasets/MG/MG0610p005_024.fits')
-
-    createCutoutsList(mg610p005)
-if __name__ == "__main__":
-    main()
-

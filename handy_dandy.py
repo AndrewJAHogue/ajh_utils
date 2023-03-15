@@ -435,4 +435,22 @@ def FilterStarsByStd(cutouts, stats):
     
     return filtered_cutouts
 
+
+def myzip(*inputs):
+    """ Zip all elements of every input together, with support for * number of arguments.
+
+    Returns:
+       numpy.ndarray : Two-dimensional array, where every three elements are grouped together. For example, input "training, testing, prediciton,"
+       output will be [training[0], testing[0], prediction[0],...]
+    """    
+    input1 = inputs[0]
+
+    zipped = []
+    for i, t1 in enumerate( input1 ):
+        zipped.append(t1)
+        zipped.extend(input[i] for input in inputs[1:])
+
+    return zipped
+
+
 # %%

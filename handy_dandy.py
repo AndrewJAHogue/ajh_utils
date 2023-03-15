@@ -232,6 +232,8 @@ def getFileName(input_str):
         return input_str[:dot]
     except ValueError as exc:
         raise ValueError("This string does not contain an extension substring") from exc
+    finally:
+        return input_str
 
 def saveCutoutsHeaders(cutouts_headers, filename):
     """Take in a tuple of (cutouts, headers) and a string filename and saves it as a joblib

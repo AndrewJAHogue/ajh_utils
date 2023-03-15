@@ -1,3 +1,6 @@
 __datasets__
 __pycache__
 ModelPrediction
+*.session
+*.vim
+*.jukit*

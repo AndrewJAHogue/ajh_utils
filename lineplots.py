@@ -154,6 +154,7 @@ def MultiLinePlot(xvalue, yvalue, fileset=[], columnlimits=[None,None,None,None]
 def plot_gallery(images, h, w, n_row=3, n_col=4, **keywargs):
     sigma = keywargs.get('sigma', 3.)
     stats = keywargs.get('stats', False)
+    index = keywargs.get('index', True)
     
     from astropy.nddata import Cutout2D
     from astropy.stats import sigma_clipped_stats
@@ -184,7 +185,8 @@ def plot_gallery(images, h, w, n_row=3, n_col=4, **keywargs):
                 title_str =  f'{mean = }\n{med = }\n{std = }'
             
         plt.subplot(n_row, n_col, i + 1, xlabel=title_str)
-        plt.title(f'Index = {i}')
+        if index:
+            plt.title(f'Index = {i}')
 
         with contextlib.suppress(IndexError):
             if type(images[i]) != Cutout2D:

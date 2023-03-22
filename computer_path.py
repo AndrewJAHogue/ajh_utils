@@ -8,15 +8,30 @@ paths = {
     "win32": "F:",
     "linux": "/media/al-linux/USB20FD/"
 }
-
-
-
-
 def get_computer_path():
     return paths[platform]
 
 def FitsFolder():
     return f'{get_computer_path()}/Python/Research/fits'
+
+
+def spits_iso1():
+    return  f'{FitsFolder()}/Reprojected Spitzer24 IsoFields @ Forcast25 isoField1.fits'
+
+def spits_iso2():
+    return f'{FitsFolder()}/Reprojected Spitzer24 IsoFields @ Forcast25 isoField2.fits'
+
+def spits_sgrb():
+    return f'{FitsFolder()}/Reprojected Spitzer24_SgrB @ Forcast25_SgrB.fits'
+
+def sofia_iso1():
+    return  f'{FitsFolder()}/Forcast25_isoField1.fits'
+    
+def spits_iso2():
+    return  f'{FitsFolder()}/Forcast25_isoField2.fits'
+
+def spits_sgrb():
+    return f'{FitsFolder()}/Forcast25_SgrB.fits'
 
 class FullMaps():
     def Sofia():
